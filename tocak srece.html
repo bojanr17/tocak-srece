@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wheel of Fortune</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+        svg {
+            transform: rotate(-90deg);
+        }
+        .pointer {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 10px;
+            height: 30px;
+            background-color: red;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+        #result {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="wheel-container">
+        <div class="pointer"></div>
+        <svg id="wheel" width="300" height="300" viewBox="0 0 300 300">
+            <!-- Define sectors -->
+            <g id="sectors"></g>
+        </svg>
+    </div>
+    <div id="result">Press the button to spin the wheel!</div>
+    <button onclick="spinWheel()">Spin the Wheel</button>
+
+    <script>
+        const wheel = document.getElementById('wheel');
+        const sectorsGroup = document.getElementById('sectors');
+        const result = document.getElementById('result');
+
+        const options = [
+            "Духоклонуће", "срећан али", "Вечито несрећан", "Геј снс бот", "Парамецијум",
+            "добрица", "Неморални бедник", "Пропадање", "Аца лукас", "Филип Вишњић"
+        ];
+
+        const sectorCount = options.length;
+        const sectorAngle = 360 / sectorCount;
+
+        // Draw the sectors
+        options.forEach((option, index) => {
+            const startAngle = sectorAngle * index;
+            const endAngle = startAngle + sectorAngle;
+
+            const x1 = 150 + 150 * Math.cos((startAngle * Math.PI) / 180);
+            const y1 = 150 + 150 * Math.sin((startAngle * Math.PI) / 180);
+            const x2 = 150 + 150 * Math.cos((endAngle * Math.PI) / 180);
+            const y2 = 150 + 150 * Math.sin((endAngle * Math.PI) / 180);
+
+            const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+
+            // Create a sector path
+            const pathData = `M150,150 L${x1},${y1} A150,150 0 ${largeArc},1 ${x2},${y2} Z`;
+
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", pathData);
+            path.setAttribute("fill", `hsl(${(360 / sectorCount) * index}, 70%, 70%)`);
+            path.setAttribute("stroke", "#000");
+
+            sectorsGroup.appendChild(path);
+
+            // Add text
+            const textAngle = startAngle + sectorAngle / 2;
+            const textX = 150 + 100 * Math.cos((textAngle * Math.PI) / 180);
+            const textY = 150 + 100 * Math.sin((textAngle * Math.PI) / 180);
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", textX);
+            text.setAttribute("y", textY);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("dominant-baseline", "middle");
+            text.setAttribute("transform", `rotate(${textAngle}, ${textX}, ${textY})`);
+            text.textContent = option;
+
+            sectorsGroup.appendChild(text);
+        });
+
+        function spinWheel() {
+            const randomChoice = Math.floor(Math.random() * sectorCount);
+            const spinDegrees = 360 * 5 + randomChoice * (360 / sectorCount);
+
+            wheel.style.transition = "transform 5s cubic-bezier(0.33, 1, 0.68, 1)";
+            wheel.style.transform = `rotate(${spinDegrees}deg)`;
+
+            setTimeout(() => {
+                const selectedOption = options[randomChoice];
+                result.textContent = `The selected choice is: ${selectedOption}`;
+                wheel.style.transition = "none";
+                wheel.style.transform = `rotate(${(randomChoice * 360) / sectorCount}deg)`;
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
